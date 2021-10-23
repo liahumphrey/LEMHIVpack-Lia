@@ -249,10 +249,31 @@ ode_model = function (t, x, vparameters){
   }
 
   #psi: screening rate
-  if (t<12)         psi = psi.m[1, ]
-  if (t>=12 & t<24) psi = psi.m[2, ]
-  if (t>=24 & t<36) psi = psi.m[3, ]
-  if (t>=36)        psi = psi.m[4, ]
+  
+  ### LIA - I noticed that years were being truncated at the end of November (e.g. <12) instead of December (<=12), and I couldn't
+  ###       ascertain if this was intentional or not. I tried to change this so that December of each year would not use the following 
+  ###       year's rate, but it broke the code and I don't want to mess with this or other files naively. 
+  
+  if (technical_assessment_part == 1) {
+    if (t<12)          psi = psi.m[1, ]  #* January 2012: t=1// January 2021: t=109// January 2030: t= 217// December 2040: t=348
+    if (t>=12 & t<24)  psi = psi.m[2, ]
+    if (t>=24 & t<36)  psi = psi.m[3, ]
+    if (t>=36)         psi = psi.m[4, ]  # december 2014: t=36 = BASELINE
+  }
+  else if (technical_assessment_part == 2) {
+    if (t<12)          psi = psi.m[1, ]  #* January 2012: t=1// January 2021: t=109// January 2030: t= 217// December 2040: t=348
+    if (t>=12 & t<24)  psi = psi.m[2, ]  
+    if (t>=24 & t<36)  psi = psi.m[3, ]   
+    if (t>=36 & t<109) psi = psi.m[4, ]  # 2015: t=36 = BASELINE
+    if (t>=109& t<217) psi = 1.7*psi.m[4,] # January 2030 
+    if (t>=217)        psi = psi.m[4, ]
+  }
+  else {
+    return("Oopsies Lia")
+  }
+  
+
+  
   ############################
 
   # out is the population difference between the time t and t+1
